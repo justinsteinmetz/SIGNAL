@@ -662,6 +662,14 @@ input[type=text]::placeholder { color: var(--muted); font-weight: 400; text-tran
     </div>
     <div class="player-question" id="playerQText">—</div>
     <div class="player-options" id="playerOptions"></div>
+    <!-- Boss question input -->
+    <div id="bossInputWrap" style="display:none;width:100%;margin-bottom:16px">
+      <input type="text" id="bossInput" placeholder="Type your answer…"
+        style="text-transform:none;letter-spacing:0;font-size:18px;margin-bottom:8px;"
+        onkeydown="if(event.key==='Enter')submitBossAnswer()">
+      <button class="btn-primary" onclick="submitBossAnswer()" style="margin-bottom:0">Submit</button>
+      <div id="bossHint" style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:0.08em"></div>
+    </div>
     <div class="player-feedback" id="playerFeedback"></div>
     <div style="display:flex;gap:24px;align-items:center;justify-content:center;margin-top:8px">
       <div style="text-align:center">
@@ -710,50 +718,62 @@ const db = firebase.database();
 // QUESTION BANK — Unit 4 Present Progressive
 // ═══════════════════════════════════════
 const ALL_QUESTIONS = [
-  // ROUND 1 — Be form
-  { round:1, context:'One person', text:'She ___ running in the park.', answer:'is', options:['is','are','am','be'] },
-  { round:1, context:'Two people', text:'They ___ eating lunch.', answer:'are', options:['are','is','am','be'] },
-  { round:1, context:'Talking about yourself', text:'I ___ listening to music.', answer:'am', options:['am','is','are','be'] },
-  { round:1, context:'One person', text:'He ___ watching a film.', answer:'is', options:['is','are','am','were'] },
-  { round:1, context:'A group', text:'We ___ playing football.', answer:'are', options:['are','is','am','be'] },
-  { round:1, context:'One thing', text:'The dog ___ sleeping on the sofa.', answer:'is', options:['is','are','am','be'] },
-  { round:1, context:'You and a friend', text:'You ___ making a lot of noise.', answer:'are', options:['are','is','am','be'] },
-  { round:1, context:'A woman', text:'Mrs Malady ___ opening the door.', answer:'is', options:['is','are','am','be'] },
-  { round:1, context:'Two things', text:'The machines ___ moving.', answer:'are', options:['are','is','am','be'] },
-  { round:1, context:'Talking about yourself', text:'I ___ waiting for Noah.', answer:'am', options:['am','is','are','be'] },
-  // ROUND 2 — Spelling
-  { round:2, context:'Group 1: just add -ing', text:'She is ___ a song.', answer:'singing', options:['singing','singeing','singingg','sings'] },
-  { round:2, context:'Group 2: drop the e', text:'He is ___ behind the post box.', answer:'hiding', options:['hiding','hideing','hididng','hidings'] },
-  { round:2, context:'Group 3: double the consonant', text:'They are ___ in the sea.', answer:'swimming', options:['swimming','swiming','swimmingg','swimeing'] },
-  { round:2, context:'Group 2: drop the e', text:'She is ___ a cake.', answer:'making', options:['making','makeing','macking','makking'] },
-  { round:2, context:'Group 3: double the consonant', text:'Noah is ___ after Buddy.', answer:'running', options:['running','runing','runeing','runns'] },
-  { round:2, context:'Group 1: just add -ing', text:'The children are ___ a book.', answer:'reading', options:['reading','readding','readeing','reads'] },
-  { round:2, context:'Group 3: double the consonant', text:'He is ___ to Alice.', answer:'chatting', options:['chatting','chating','chatteing','chats'] },
-  { round:2, context:'Group 2: drop the e', text:'They are ___ the problem.', answer:'deciding', options:['deciding','decideing','decid-ing','decidding'] },
-  { round:2, context:'Group 1: just add -ing', text:'I am ___ for my phone.', answer:'looking', options:['looking','lookking','lookeing','looks'] },
-  { round:2, context:'Group 3: double the consonant', text:'She is ___ on the chair.', answer:'sitting', options:['sitting','siting','sitteing','sits'] },
-  // ROUND 3 — Positive / Negative
-  { round:3, context:'She picks up a sandwich.', text:'She ___ drinking water.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
-  { round:3, context:'Everyone at the party is smiling.', text:'They ___ having fun.', answer:'are', options:['are',"aren't","isn't",'am not'] },
-  { round:3, context:'He sits down with a book and opens it.', text:'He ___ reading his book.', answer:'is', options:['is',"isn't","aren't",'am not'] },
-  { round:3, context:'The beach is very loud this morning.', text:'The seagulls ___ making a lot of noise.', answer:'are', options:['are',"aren't","isn't",'am not'] },
-  { round:3, context:'Two kids sit on the grass watching the others.', text:'Some kids ___ playing frisbee.', answer:"aren't", options:["aren't",'are',"isn't",'am not'] },
-  { round:3, context:'I put the chips down and walk away.', text:'I am ___ eating chips.', answer:'not', options:['not','still','also','very'] },
-  { round:3, context:'Noah stands completely still, eyes down.', text:'Noah ___ saying anything.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
-  { round:3, context:'Zane and Lily arrive at the café door.', text:'They ___ waiting at the café.', answer:'are', options:['are',"aren't","isn't",'am not'] },
-  { round:3, context:'Mrs Malady slams the door and shouts.', text:'Mrs Malady ___ laughing.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
-  { round:3, context:"Hugo's eyes are black. He doesn't move.", text:'Hugo ___ talking.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
-  // ROUND 4 — Now or Always
-  { round:4, context:'Right now — at this moment', text:'Look! She ___ a selfie.', answer:'is taking', options:['is taking','takes','take','taking'] },
-  { round:4, context:'Every day — a habit', text:'He usually ___ lunch at school.', answer:'has', options:['has','is having','having','have'] },
-  { round:4, context:'At this moment', text:'They ___ football right now.', answer:'are playing', options:['are playing','play','plays','playing'] },
-  { round:4, context:'Always — a routine', text:'She always ___ her teeth before bed.', answer:'brushes', options:['brushes','is brushing','brush','brushing'] },
-  { round:4, context:'At this moment', text:"The dog ___ right now — it's very loud.", answer:'is barking', options:['is barking','barks','bark','barking'] },
-  { round:4, context:'A general fact', text:'Noah never ___ Alice first.', answer:'texts', options:['texts','is texting','text','texting'] },
-  { round:4, context:'Right now', text:'Wait — someone ___ the door.', answer:'is opening', options:['is opening','opens','open','opening'] },
-  { round:4, context:'Every Sunday — a routine', text:'We usually ___ fish and chips on Sundays.', answer:'eat', options:['eat','are eating','eating','eats'] },
-  { round:4, context:'At this moment', text:'Look at Zane. He ___ to Lily!', answer:'is talking', options:['is talking','talks','talk','talking'] },
-  { round:4, context:'A habit', text:'She often ___ her hair in the morning.', answer:'dries', options:['dries','is drying','dry','drying'] },
+  // ROUND 1 — Be form (level 1)
+  { round:1, level:1, context:'One person', text:'She ___ running in the park.', answer:'is', options:['is','are','am','be'] },
+  { round:1, level:1, context:'Two people', text:'They ___ eating lunch.', answer:'are', options:['are','is','am','be'] },
+  { round:1, level:1, context:'Talking about yourself', text:'I ___ listening to music.', answer:'am', options:['am','is','are','be'] },
+  { round:1, level:1, context:'One person', text:'He ___ watching a film.', answer:'is', options:['is','are','am','were'] },
+  { round:1, level:1, context:'A group', text:'We ___ playing football.', answer:'are', options:['are','is','am','be'] },
+  { round:1, level:1, context:'One thing', text:'The dog ___ sleeping on the sofa.', answer:'is', options:['is','are','am','be'] },
+  { round:1, level:1, context:'You and a friend', text:'You ___ making a lot of noise.', answer:'are', options:['are','is','am','be'] },
+  { round:1, level:1, context:'A woman', text:'Mrs Malady ___ opening the door.', answer:'is', options:['is','are','am','be'] },
+  { round:1, level:1, context:'Two things', text:'The machines ___ moving.', answer:'are', options:['are','is','am','be'] },
+  { round:1, level:1, context:'Talking about yourself', text:'I ___ waiting for Noah.', answer:'am', options:['am','is','are','be'] },
+  // ROUND 2 — Spelling (level 2)
+  { round:2, level:2, context:'Group 1: just add -ing', text:'She is ___ a song.', answer:'singing', options:['singing','singeing','singingg','sings'] },
+  { round:2, level:2, context:'Group 2: drop the e', text:'He is ___ behind the post box.', answer:'hiding', options:['hiding','hideing','hididng','hidings'] },
+  { round:2, level:2, context:'Group 3: double the consonant', text:'They are ___ in the sea.', answer:'swimming', options:['swimming','swiming','swimmingg','swimeing'] },
+  { round:2, level:2, context:'Group 2: drop the e', text:'She is ___ a cake.', answer:'making', options:['making','makeing','macking','makking'] },
+  { round:2, level:2, context:'Group 3: double the consonant', text:'Noah is ___ after Buddy.', answer:'running', options:['running','runing','runeing','runns'] },
+  { round:2, level:2, context:'Group 1: just add -ing', text:'The children are ___ a book.', answer:'reading', options:['reading','readding','readeing','reads'] },
+  { round:2, level:2, context:'Group 3: double the consonant', text:'He is ___ to Alice.', answer:'chatting', options:['chatting','chating','chatteing','chats'] },
+  { round:2, level:2, context:'Group 2: drop the e', text:'They are ___ the problem.', answer:'deciding', options:['deciding','decideing','decid-ing','decidding'] },
+  { round:2, level:2, context:'Group 1: just add -ing', text:'I am ___ for my phone.', answer:'looking', options:['looking','lookking','lookeing','looks'] },
+  { round:2, level:2, context:'Group 3: double the consonant', text:'She is ___ on the chair.', answer:'sitting', options:['sitting','siting','sitteing','sits'] },
+  // ROUND 3 — Positive / Negative (level 3)
+  { round:3, level:3, context:'She picks up a sandwich.', text:'She ___ drinking water.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
+  { round:3, level:3, context:'Everyone at the party is smiling.', text:'They ___ having fun.', answer:'are', options:['are',"aren't","isn't",'am not'] },
+  { round:3, level:3, context:'He sits down with a book and opens it.', text:'He ___ reading his book.', answer:'is', options:['is',"isn't","aren't",'am not'] },
+  { round:3, level:3, context:'The beach is very loud this morning.', text:'The seagulls ___ making a lot of noise.', answer:'are', options:['are',"aren't","isn't",'am not'] },
+  { round:3, level:3, context:'Two kids sit on the grass watching the others.', text:'Some kids ___ playing frisbee.', answer:"aren't", options:["aren't",'are',"isn't",'am not'] },
+  { round:3, level:3, context:'I put the chips down and walk away.', text:'I am ___ eating chips.', answer:'not', options:['not','still','also','very'] },
+  { round:3, level:3, context:'Noah stands completely still, eyes down.', text:'Noah ___ saying anything.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
+  { round:3, level:3, context:'Zane and Lily arrive at the café door.', text:'They ___ waiting at the café.', answer:'are', options:['are',"aren't","isn't",'am not'] },
+  { round:3, level:3, context:'Mrs Malady slams the door and shouts.', text:'Mrs Malady ___ laughing.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
+  { round:3, level:3, context:"Hugo's eyes are black. He doesn't move.", text:'Hugo ___ talking.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
+  // ROUND 4 — Now or Always (level 4)
+  { round:4, level:4, context:'Right now — at this moment', text:'Look! She ___ a selfie.', answer:'is taking', options:['is taking','takes','take','taking'] },
+  { round:4, level:4, context:'Every day — a habit', text:'He usually ___ lunch at school.', answer:'has', options:['has','is having','having','have'] },
+  { round:4, level:4, context:'At this moment', text:'They ___ football right now.', answer:'are playing', options:['are playing','play','plays','playing'] },
+  { round:4, level:4, context:'Always — a routine', text:'She always ___ her teeth before bed.', answer:'brushes', options:['brushes','is brushing','brush','brushing'] },
+  { round:4, level:4, context:'At this moment', text:"The dog ___ right now — it's very loud.", answer:'is barking', options:['is barking','barks','bark','barking'] },
+  { round:4, level:4, context:'A general fact', text:'Noah never ___ Alice first.', answer:'texts', options:['texts','is texting','text','texting'] },
+  { round:4, level:4, context:'Right now', text:'Wait — someone ___ the door.', answer:'is opening', options:['is opening','opens','open','opening'] },
+  { round:4, level:4, context:'Every Sunday — a routine', text:'We usually ___ fish and chips on Sundays.', answer:'eat', options:['eat','are eating','eating','eats'] },
+  { round:4, level:4, context:'At this moment', text:'Look at Zane. He ___ to Lily!', answer:'is talking', options:['is talking','talks','talk','talking'] },
+  { round:4, level:4, context:'A habit', text:'She often ___ her hair in the morning.', answer:'dries', options:['dries','is drying','dry','drying'] },
+];
+
+// BOSS QUESTIONS — free type, worth 20 pts
+const BOSS_QUESTIONS = [
+  { context:'Complete the sentence', text:'She ___ (hide) behind the post box.', answer:'is hiding', hint:'is + hiding' },
+  { context:'Complete the sentence', text:'They ___ (run) in the park right now.', answer:'are running', hint:'are + running' },
+  { context:'Complete the sentence', text:'I ___ (not/eat) — I hate fish and chips.', answer:"am not eating", hint:"am not eating" },
+  { context:'Make it negative', text:'She is singing. → She ___ singing.', answer:"isn't", hint:"isn't" },
+  { context:'Complete the sentence', text:'Noah ___ (swim) — the water is too cold.', answer:"isn't swimming", hint:"isn't swimming" },
+  { context:'Now or always?', text:'Look! The dog ___ (bark) at the seagulls.', answer:'is barking', hint:'is barking' },
+  { context:'Complete the sentence', text:'We ___ (not/play) — we are watching.', answer:"aren't playing", hint:"aren't playing" },
+  { context:'Make it negative', text:'They are talking. → They ___ talking.', answer:"aren't", hint:"aren't" },
 ];
 
 const ROUND_COLORS = {
@@ -801,6 +821,22 @@ let playerScore = 0;
 let answersListener = null;
 let stateListener = null;
 let playersListener = null;
+let questionResolved = false;  // guard against double-reveal
+let currentStartTime = 0;      // authoritative startTime from host push
+
+// Fuzzy match: normalise case, whitespace, apostrophes, AND contracted/expanded forms
+function fuzzyMatch(input, correct) {
+  const norm = s => s.toLowerCase()
+    .replace(/[''`]/g, "'")
+    .replace(/\bis\s+not\b/g, "isn't")
+    .replace(/\bare\s+not\b/g, "aren't")
+    .replace(/\bam\s+not\b/g, "am not")
+    .replace(/\bwas\s+not\b/g, "wasn't")
+    .replace(/\bwere\s+not\b/g, "weren't")
+    .replace(/\s+/g, ' ')
+    .trim();
+  return norm(input) === norm(correct);
+}
 
 // ═══════════════════════════════════════
 // NAVIGATION
@@ -826,8 +862,24 @@ function createRoom() {
   roomCode = Math.random().toString(36).substring(2,6).toUpperCase();
   MODE = 'host';
 
-  // Build question queue
-  queuedQuestions = shuffle(ALL_QUESTIONS).slice(0, totalQuestions);
+  // Build question queue — interleave boss questions every 5th slot
+  const shuffled = shuffle(ALL_QUESTIONS);
+  const bossPool = shuffle(BOSS_QUESTIONS);
+  let bossIdx = 0;
+  queuedQuestions = [];
+  let regularIdx = 0;
+  for (let i = 0; i < totalQuestions; i++) {
+    if ((i + 1) % 5 === 0) {
+      // Boss question slot
+      const bq = bossPool[bossIdx % bossPool.length];
+      queuedQuestions.push({ ...bq, boss: true, round: 4, level: 4 });
+      bossIdx++;
+    } else {
+      if (regularIdx < shuffled.length) {
+        queuedQuestions.push(shuffled[regularIdx++]);
+      }
+    }
+  }
 
   // Write room to Firebase
   db.ref('rooms/' + roomCode).set({
@@ -892,7 +944,7 @@ function pushQuestion(index) {
   setRoundColor(q.round);
 
   // Update header
-  document.getElementById('hostRoundTag').textContent = ROUND_NAMES[q.round];
+  document.getElementById('hostRoundTag').textContent = q.boss ? '⚡ BOSS' : ROUND_NAMES[q.round];
   document.getElementById('hostQCounter').textContent = `${index+1} / ${totalQuestions}`;
   document.getElementById('hostAnswersIn').textContent = '0 answers';
 
@@ -901,43 +953,58 @@ function pushQuestion(index) {
   const blankText = q.text.replace('___', `<span class="q-blank" id="hostBlank">___</span>`);
   document.getElementById('hostQText').innerHTML = blankText;
 
-  // Render options (shuffled per question)
-  const opts = shuffle(q.options);
-  document.getElementById('hostOptions').innerHTML = opts.map(o =>
-    `<div class="opt-host" id="opt-${o.replace(/\s/g,'_').replace(/'/g,'')}">${o}<span class="opt-count" id="count-${o.replace(/\s/g,'_').replace(/'/g,'')}"></span></div>`
-  ).join('');
+  // Host options — boss shows "Type-in" indicator, not clickable options
+  if (q.boss) {
+    document.getElementById('hostOptions').innerHTML =
+      `<div style="grid-column:1/-1;background:var(--accent-dim);border:2px solid var(--accent-border);padding:16px;text-align:center;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.1em;color:var(--accent)">
+        ⚡ BOSS QUESTION — Students type their answer · Worth 20 points
+        ${q.hint ? `<br><span style="color:var(--muted);margin-top:6px;display:block">Hint shown: ${q.hint}</span>` : ''}
+      </div>`;
+  } else {
+    const opts = shuffle(q.options);
+    document.getElementById('hostOptions').innerHTML = opts.map(o =>
+      `<div class="opt-host" id="opt-${o.replace(/\s/g,'_').replace(/'/g,'')}">${o}<span class="opt-count" id="count-${o.replace(/\s/g,'_').replace(/'/g,'')}"></span></div>`
+    ).join('');
+  }
 
   // Push to Firebase for players
   const startTime = Date.now();
+  currentStartTime = startTime;   // store authoritatively in state
+  questionResolved = false;       // reset guard for this question
+
   db.ref('rooms/' + roomCode + '/currentQ').set({
     text: q.text,
     context: q.context,
-    options: opts,
+    options: q.boss ? null : shuffle(q.options),
     answer: q.answer,
     round: q.round,
+    boss: q.boss || false,
+    hint: q.hint || null,
     startTime: startTime,
     index: index,
   });
 
-  // Clear previous answers
-  db.ref('rooms/' + roomCode + '/answers').remove();
+  // Clear previous answers, then detach old listener and attach fresh one
+  db.ref('rooms/' + roomCode + '/answers').remove().then(() => {
+    if (answersListener) {
+      db.ref('rooms/' + roomCode + '/answers').off('value', answersListener);
+      answersListener = null;
+    }
+    answersListener = db.ref('rooms/' + roomCode + '/answers').on('value', snap => {
+      const answers = snap.val() || {};
+      const count = Object.keys(answers).length;
+      document.getElementById('hostAnswersIn').textContent = `${count} answer${count !== 1 ? 's' : ''}`;
 
-  // Listen to incoming answers
-  if (answersListener) db.ref('rooms/' + roomCode + '/answers').off('value', answersListener);
-  answersListener = db.ref('rooms/' + roomCode + '/answers').on('value', snap => {
-    const answers = snap.val() || {};
-    const count = Object.keys(answers).length;
-    document.getElementById('hostAnswersIn').textContent = `${count} answer${count !== 1 ? 's' : ''}`;
-
-    // Tally per option
-    const tally = {};
-    Object.values(answers).forEach(a => {
-      tally[a.answer] = (tally[a.answer] || 0) + 1;
-    });
-    opts.forEach(o => {
-      const key = o.replace(/\s/g,'_').replace(/'/g,'');
-      const el = document.getElementById('count-' + key);
-      if (el) el.textContent = tally[o] ? tally[o] : '';
+      if (!q.boss) {
+        // Tally per option for non-boss
+        const tally = {};
+        Object.values(answers).forEach(a => { tally[a.answer] = (tally[a.answer] || 0) + 1; });
+        (q.options || []).forEach(o => {
+          const key = o.replace(/\s/g,'_').replace(/'/g,'');
+          const el = document.getElementById('count-' + key);
+          if (el) el.textContent = tally[o] ? tally[o] : '';
+        });
+      }
     });
   });
 
@@ -958,31 +1025,53 @@ function startHostTimer(startTime, duration, q) {
     if (pct < 0.25) bar.className = 'timer-bar-fill urgent';
     if (pct <= 0) {
       clearInterval(hostTimerInterval);
-      revealAnswer(q);
+      // 200ms grace window for late submissions in transit
+      setTimeout(() => revealAnswer(q, startTime), 200);
     }
   }, 80);
 }
 
-function revealAnswer(q) {
-  // Highlight correct option on host
-  const correctKey = q.answer.replace(/\s/g,'_').replace(/'/g,'');
-  const correctEl = document.getElementById('opt-' + correctKey);
-  if (correctEl) correctEl.classList.add('is-correct');
+function revealAnswer(q, startTime) {
+  // Guard: run exactly once per question
+  if (questionResolved) return;
+  questionResolved = true;
+
+  // Detach answers listener now — no more tally updates needed
+  if (answersListener) {
+    db.ref('rooms/' + roomCode + '/answers').off('value', answersListener);
+    answersListener = null;
+  }
+
+  // Highlight correct option on host (non-boss)
+  if (!q.boss) {
+    const correctKey = q.answer.replace(/\s/g,'_').replace(/'/g,'');
+    const correctEl = document.getElementById('opt-' + correctKey);
+    if (correctEl) correctEl.classList.add('is-correct');
+  }
 
   // Reveal in blank
   const blank = document.getElementById('hostBlank');
   if (blank) { blank.textContent = q.answer; blank.classList.add('correct'); }
 
-  // Score players via Firebase transaction
+  // Use authoritative startTime from state
+  const qStartTime = startTime || currentStartTime;
+
+  // Score players
   db.ref('rooms/' + roomCode + '/answers').once('value', snap => {
     const answers = snap.val() || {};
-    const startTime = Date.now() - questionDuration;
 
     Object.entries(answers).forEach(([pid, v]) => {
-      if (v.answer === q.answer) {
-        const speed = Math.max(0, questionDuration - (v.time - (Date.now() - questionDuration)));
-        const speedBonus = Math.floor((speed / questionDuration) * 5);
-        db.ref(`rooms/${roomCode}/players/${pid}/score`).transaction(s => (s||0) + 10 + speedBonus);
+      const isCorrect = q.boss
+        ? fuzzyMatch(v.answer, q.answer)
+        : v.answer === q.answer;
+
+      const basePoints = q.boss ? 20 : 10;
+      const speedBonus = q.boss ? 0 : Math.floor(
+        (Math.max(0, questionDuration - (v.time - qStartTime)) / questionDuration) * 5
+      );
+
+      if (isCorrect) {
+        db.ref(`rooms/${roomCode}/players/${pid}/score`).transaction(s => (s||0) + basePoints + speedBonus);
         db.ref(`rooms/${roomCode}/players/${pid}/streak`).transaction(s => (s||0) + 1);
         db.ref(`rooms/${roomCode}/players/${pid}/lastCorrect`).set(true);
       } else {
@@ -995,7 +1084,7 @@ function revealAnswer(q) {
   // Signal reveal to players
   db.ref('rooms/' + roomCode + '/currentQ/revealed').set(true);
 
-  // Update leaderboard
+  // Update leaderboard then advance
   setTimeout(() => {
     renderHostLeaderboard();
     setTimeout(() => pushQuestion(currentQIndex + 1), 2200);
@@ -1105,10 +1194,11 @@ function listenForGameState() {
     // New question
     if (!q.revealed) {
       playerAnswered = false;
+      window._currentQ = q;
       setRoundColor(q.round);
       goTo('player-game');
       renderPlayerQuestion(q);
-      startPlayerTimer(q.startTime, db.ref(`rooms/${roomCode}`).child('duration') );
+      startPlayerTimer(q.startTime, db.ref(`rooms/${roomCode}`).child('duration'));
     } else {
       // Reveal phase
       showPlayerReveal(q);
@@ -1137,15 +1227,26 @@ function renderPlayerQuestion(q) {
   document.getElementById('playerQText').innerHTML =
     q.text.replace('___', `<span style="border-bottom:3px solid var(--rc);color:var(--rc);padding:0 8px">___</span>`);
 
-  // Render options (already shuffled by host)
-  document.getElementById('playerOptions').innerHTML = q.options.map(o =>
-    `<button class="opt-player" onclick="submitAnswer('${o.replace(/'/g,"\\'")}',this,'${q.answer.replace(/'/g,"\\'")}')">
-      ${o}
-    </button>`
-  ).join('');
-
   document.getElementById('playerFeedback').textContent = '';
   document.getElementById('playerFeedback').className = 'player-feedback';
+
+  if (q.boss) {
+    // Boss question — type-in mode
+    document.getElementById('playerOptions').innerHTML = '';
+    document.getElementById('bossInputWrap').style.display = 'block';
+    document.getElementById('bossInput').value = '';
+    document.getElementById('bossInput').disabled = false;
+    document.getElementById('bossHint').textContent = q.hint ? `Hint: ${q.hint}` : '';
+    setTimeout(() => document.getElementById('bossInput').focus(), 100);
+  } else {
+    // Normal question — multiple choice
+    document.getElementById('bossInputWrap').style.display = 'none';
+    document.getElementById('playerOptions').innerHTML = q.options.map(o =>
+      `<button class="opt-player" onclick="submitAnswer('${o.replace(/'/g,"\\'")}',this,'${q.answer.replace(/'/g,"\\'")}')">
+        ${o}
+      </button>`
+    ).join('');
+  }
 }
 
 function submitAnswer(chosen, btn, correct) {
@@ -1176,8 +1277,42 @@ function submitAnswer(chosen, btn, correct) {
   });
 }
 
+function submitBossAnswer() {
+  if (playerAnswered) return;
+  const val = document.getElementById('bossInput').value.trim();
+  if (!val) return;
+  playerAnswered = true;
+
+  document.getElementById('bossInput').disabled = true;
+  document.querySelector('#bossInputWrap button').disabled = true;
+
+  // Client-side fuzzy check for immediate feedback
+  // (host will do authoritative check for scoring)
+  const q = window._currentQ;
+  const localCorrect = q && fuzzyMatch(val, q.answer);
+
+  if (localCorrect) {
+    document.getElementById('playerFeedback').textContent = '✓ Looks right!';
+    document.getElementById('playerFeedback').className = 'player-feedback fb-correct';
+    flashScreen('green');
+  } else {
+    document.getElementById('playerFeedback').textContent = '⏳ Submitted — wait for reveal';
+    document.getElementById('playerFeedback').className = 'player-feedback fb-waiting';
+  }
+
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({
+    answer: val,
+    time: Date.now(),
+  });
+}
+
 function showPlayerReveal(q) {
-  // Reveal correct answer on buttons
+  // Disable boss input if showing
+  document.getElementById('bossInput').disabled = true;
+  const bossBtn = document.querySelector('#bossInputWrap button');
+  if (bossBtn) bossBtn.disabled = true;
+
+  // Reveal correct answer on buttons (non-boss)
   document.querySelectorAll('.opt-player').forEach(btn => {
     btn.disabled = true;
     if (btn.textContent.trim() === q.answer) {
@@ -1190,6 +1325,10 @@ function showPlayerReveal(q) {
   if (!playerAnswered) {
     document.getElementById('playerFeedback').textContent = "Time's up — the answer was: " + q.answer;
     document.getElementById('playerFeedback').className = 'player-feedback fb-wrong';
+  } else if (q.boss) {
+    // Show correct answer for boss questions
+    document.getElementById('playerFeedback').textContent = `Answer: ${q.answer}`;
+    document.getElementById('playerFeedback').className = 'player-feedback fb-waiting';
   }
 }
 

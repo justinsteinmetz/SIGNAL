@@ -559,11 +559,14 @@ input[type=text]::placeholder { color: var(--muted); font-weight: 400; text-tran
   <!-- ── MENU ── -->
   <div class="screen active" id="menu">
     <div class="logo">SIGNAL</div>
-    <div class="eyebrow">Present Progressive · Multiplayer</div>
-    <div class="menu-choices">
+    <div class="eyebrow">Present Progressive</div>
+    <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
       <button class="btn-primary" onclick="goTo('host-setup')">Host</button>
       <button class="btn-secondary" onclick="goTo('join-screen')">Join</button>
     </div>
+    <button class="btn-secondary" onclick="startSolo()" style="width:100%;border-color:var(--r2-border);color:var(--text)">
+      Solo — Play alone
+    </button>
   </div>
 
   <!-- ── HOST SETUP ── -->
@@ -692,6 +695,75 @@ input[type=text]::placeholder { color: var(--muted); font-weight: 400; text-tran
       <div id="finalLeaderboard"></div>
     </div>
     <button class="btn-primary" onclick="location.reload()">Play again</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SOLO MODE SCREENS
+       ══════════════════════════════════════ -->
+
+  <!-- Solo round transition -->
+  <div class="screen" id="s-round-screen" style="text-align:center">
+    <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px" id="s-roundBig">Round 01 / 04</div>
+    <h2 style="font-size:clamp(36px,8vw,56px);font-weight:800;letter-spacing:-0.03em;margin-bottom:8px;color:var(--rc)" id="s-roundTitleBig"></h2>
+    <div style="background:var(--rc-dim);border:1px solid var(--rc-border);border-left:4px solid var(--rc);padding:16px 20px;margin:24px 0 32px;text-align:left;font-size:14px;color:var(--mid);line-height:1.6;width:100%;border-radius:2px" id="s-roundRule"></div>
+    <button class="btn-primary" onclick="sBeginRound()">Let's go →</button>
+    <button class="btn-ghost" onclick="goTo('menu')">← Menu</button>
+  </div>
+
+  <!-- Solo game -->
+  <div class="screen" id="s-game-screen" style="width:100%">
+    <div style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--rc)" id="s-roundIndicator">Round 1 / 4</div>
+      <div style="display:flex;gap:6px;align-items:center" id="s-livesDisplay">
+        <div style="width:10px;height:10px;background:var(--red);border-radius:50%;transition:all 0.3s" id="s-life0"></div>
+        <div style="width:10px;height:10px;background:var(--red);border-radius:50%;transition:all 0.3s" id="s-life1"></div>
+        <div style="width:10px;height:10px;background:var(--red);border-radius:50%;transition:all 0.3s" id="s-life2"></div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700" id="s-scoreDisplay">0</div>
+    </div>
+    <div style="width:100%;height:2px;background:var(--border);margin-bottom:6px">
+      <div style="height:100%;background:var(--rc);transition:width 0.3s ease" id="s-progressFill"></div>
+    </div>
+    <div style="width:100%;height:3px;background:var(--border);margin-bottom:20px">
+      <div style="height:100%;background:var(--rc);transition:width 0.1s linear" id="s-timerBar"></div>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;align-self:flex-start" id="s-roundLabel"></div>
+    <div style="width:100%;background:var(--surface);border:1px solid var(--border);padding:32px 28px;margin-bottom:20px;position:relative;overflow:hidden;min-height:120px;display:flex;flex-direction:column;justify-content:center" id="s-questionCard">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px" id="s-questionContext"></div>
+      <div style="font-size:clamp(20px,4vw,28px);font-weight:700;line-height:1.3;letter-spacing:-0.01em" id="s-questionText"></div>
+      <div style="margin-top:12px;font-family:'Space Mono',monospace;font-size:12px;min-height:20px" id="s-feedbackRow"></div>
+    </div>
+    <div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px" id="s-optionsGrid"></div>
+    <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;align-self:flex-end">
+      Streak: <span style="color:var(--rc);font-weight:700" id="s-streakNum">0</span>
+    </div>
+  </div>
+
+  <!-- Solo end -->
+  <div class="screen" id="s-end-screen" style="text-align:center">
+    <div style="font-size:clamp(80px,18vw,112px);font-weight:800;line-height:1;letter-spacing:-0.05em;margin-bottom:4px" id="s-endGrade"></div>
+    <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:32px" id="s-endLabel"></div>
+    <div style="width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:32px">
+      <div style="background:var(--surface);border:1px solid var(--border);padding:14px 10px;text-align:center">
+        <span style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px" id="s-finalScore">0</span>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Score</span>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);padding:14px 10px;text-align:center">
+        <span style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px" id="s-finalCorrect">0</span>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Correct</span>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);padding:14px 10px;text-align:center">
+        <span style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px" id="s-finalStreak">0</span>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Best streak</span>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);padding:14px 10px;text-align:center">
+        <span style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px" id="s-finalRounds">0</span>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Rounds</span>
+      </div>
+    </div>
+    <p style="font-size:15px;color:var(--mid);line-height:1.7;margin-bottom:32px;max-width:380px" id="s-endMessage"></p>
+    <button class="btn-primary" onclick="startSolo()">Play again</button>
+    <button class="btn-ghost" onclick="goTo('menu')" style="margin-top:8px">← Menu</button>
   </div>
 
 </div><!-- /wrap -->
@@ -1375,6 +1447,281 @@ function showPlayerEnd() {
 
     goTo('end');
   });
+}
+
+// ═══════════════════════════════════════
+// SOLO MODE
+// ═══════════════════════════════════════
+
+const SOLO_ROUNDS = [
+  {
+    id: 1, name: 'Be + -ing', label: 'Choose the right form of be',
+    rule: '<strong>The present progressive:</strong> use <em>am / is / are</em> + the -ing form of the verb.<br><span style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent);display:block;margin-top:6px">I am reading. · She is sleeping. · They are talking.</span>',
+    questions: [
+      { context:'One person', text:'She ___ running in the park.', blank:'___', options:['is','are','am','be'], answer:'is' },
+      { context:'Two people', text:'They ___ eating lunch.', blank:'___', options:['are','is','am','be'], answer:'are' },
+      { context:'Talking about yourself', text:'I ___ listening to music.', blank:'___', options:['am','is','are','be'], answer:'am' },
+      { context:'One person', text:'He ___ watching a film.', blank:'___', options:['is','are','am','were'], answer:'is' },
+      { context:'A group', text:'We ___ playing football.', blank:'___', options:['are','is','am','be'], answer:'are' },
+      { context:'One thing', text:'The dog ___ sleeping on the sofa.', blank:'___', options:['is','are','am','be'], answer:'is' },
+      { context:'You and a friend', text:'You ___ making a lot of noise.', blank:'___', options:['are','is','am','be'], answer:'are' },
+      { context:'A woman', text:'Mrs Malady ___ opening the door.', blank:'___', options:['is','are','am','be'], answer:'is' },
+      { context:'Two things', text:'The machines ___ moving.', blank:'___', options:['are','is','am','be'], answer:'are' },
+      { context:'Talking about yourself', text:'I ___ waiting for Noah.', blank:'___', options:['am','is','are','be'], answer:'am' },
+    ]
+  },
+  {
+    id: 2, name: 'Spelling', label: 'Choose the correct -ing form',
+    rule: '<strong>Three spelling groups:</strong><br>Group 1: just add -ing → <em>sing → singing</em><br>Group 2: drop the e → <em>hide → hiding</em><br>Group 3: double the consonant → <em>run → running</em><span style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent);display:block;margin-top:6px">swim → swimming · make → making · read → reading</span>',
+    questions: [
+      { context:'Group 1 — just add -ing', text:'She is ___ a song.', blank:'___', options:['singing','singeing','singingg','sings'], answer:'singing' },
+      { context:'Group 2 — drop the e', text:'He is ___ behind the post box.', blank:'___', options:['hiding','hideing','hididng','hidings'], answer:'hiding' },
+      { context:'Group 3 — double the consonant', text:'They are ___ in the sea.', blank:'___', options:['swimming','swiming','swimmingg','swimeing'], answer:'swimming' },
+      { context:'Group 2 — drop the e', text:'She is ___ a cake.', blank:'___', options:['making','makeing','macking','makking'], answer:'making' },
+      { context:'Group 3 — double the consonant', text:'Noah is ___ after Buddy.', blank:'___', options:['running','runing','runeing','runns'], answer:'running' },
+      { context:'Group 1 — just add -ing', text:'The children are ___ a book.', blank:'___', options:['reading','readding','readeing','reads'], answer:'reading' },
+      { context:'Group 3 — double the consonant', text:'He is ___ to Alice.', blank:'___', options:['chatting','chating','chatteing','chats'], answer:'chatting' },
+      { context:'Group 2 — drop the e', text:'They are ___ the problem.', blank:'___', options:['deciding','decideing','decid-ing','decidding'], answer:'deciding' },
+      { context:'Group 1 — just add -ing', text:'I am ___ for my phone.', blank:'___', options:['looking','lookking','lookeing','looks'], answer:'looking' },
+      { context:'Group 3 — double the consonant', text:'She is ___ on the chair.', blank:'___', options:['sitting','siting','sitteing','sits'], answer:'sitting' },
+    ]
+  },
+  {
+    id: 3, name: 'Positive / Negative', label: 'Is it happening, or not?',
+    rule: '<strong>Negative:</strong> use <em>am not / isn\'t / aren\'t</em> + -ing.<br><em>isn\'t</em> = is not &nbsp;·&nbsp; <em>aren\'t</em> = are not<span style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent);display:block;margin-top:6px">She isn\'t sleeping. · They aren\'t talking. · I\'m not eating.</span>',
+    questions: [
+      { context:'She picks up a sandwich.', text:'She ___ drinking water.', blank:'___', options:["isn't",'is',"aren't",'am not'], answer:"isn't" },
+      { context:'Everyone at the party is smiling.', text:'They ___ having fun.', blank:'___', options:['are',"aren't","isn't",'am not'], answer:'are' },
+      { context:'He sits down with a book and opens it.', text:'He ___ reading his book.', blank:'___', options:['is',"isn't","aren't",'am not'], answer:'is' },
+      { context:'The beach is very loud this morning.', text:'The seagulls ___ making a lot of noise.', blank:'___', options:['are',"aren't","isn't",'am not'], answer:'are' },
+      { context:'Two kids sit on the grass watching the others.', text:'Some kids ___ playing frisbee.', blank:'___', options:["aren't",'are',"isn't",'am not'], answer:"aren't" },
+      { context:'I put the chips down and walk away.', text:'I am ___ eating chips.', blank:'___', options:['not','still','also','very'], answer:'not' },
+      { context:'Noah stands completely still, eyes down.', text:'Noah ___ saying anything.', blank:'___', options:["isn't",'is',"aren't",'am not'], answer:"isn't" },
+      { context:'Zane and Lily arrive at the café door.', text:'They ___ waiting at the café.', blank:'___', options:['are',"aren't","isn't",'am not'], answer:'are' },
+      { context:'Mrs Malady slams the door and shouts.', text:'Mrs Malady ___ laughing.', blank:'___', options:["isn't",'is',"aren't",'am not'], answer:"isn't" },
+      { context:"Hugo's eyes are black. He doesn't move.", text:'Hugo ___ talking.', blank:'___', options:["isn't",'is',"aren't",'am not'], answer:"isn't" },
+    ]
+  },
+  {
+    id: 4, name: 'Now or Always?', label: 'Simple present or present progressive?',
+    rule: '<strong>Simple present</strong> = routines, habits, always/usually/never.<br><strong>Present progressive</strong> = happening right now, at this moment.<span style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent);display:block;margin-top:6px">She usually walks to school. · But today she is taking the bus.</span>',
+    questions: [
+      { context:'Right now — at this moment', text:'Look! She ___ a selfie.', blank:'___', options:['is taking','takes','take','taking'], answer:'is taking' },
+      { context:'Every day — a habit', text:'He usually ___ lunch at school.', blank:'___', options:['has','is having','having','have'], answer:'has' },
+      { context:'At this moment', text:'They ___ football right now.', blank:'___', options:['are playing','play','plays','playing'], answer:'are playing' },
+      { context:'Always — a routine', text:'She always ___ her teeth before bed.', blank:'___', options:['brushes','is brushing','brush','brushing'], answer:'brushes' },
+      { context:'At this moment', text:"The dog ___ right now — it's very loud.", blank:'___', options:['is barking','barks','bark','barking'], answer:'is barking' },
+      { context:'A general fact', text:'Noah never ___ Alice first.', blank:'___', options:['texts','is texting','text','texting'], answer:'texts' },
+      { context:'Right now', text:'Wait — someone ___ the door.', blank:'___', options:['is opening','opens','open','opening'], answer:'is opening' },
+      { context:'Every Sunday — a routine', text:'We usually ___ fish and chips on Sundays.', blank:'___', options:['eat','are eating','eating','eats'], answer:'eat' },
+      { context:'At this moment', text:'Look at Zane. He ___ to Lily!', blank:'___', options:['is talking','talks','talk','talking'], answer:'is talking' },
+      { context:'A habit', text:'She often ___ her hair in the morning.', blank:'___', options:['dries','is drying','dry','drying'], answer:'dries' },
+    ]
+  }
+];
+
+let solo = {
+  currentRound:0, currentQuestion:0, lives:3, score:0,
+  streak:0, bestStreak:0, totalCorrect:0, answered:false,
+  timer:null, timerValue:100, roundsCompleted:0, shuffledQuestions:[],
+};
+
+function startSolo() {
+  solo = {
+    currentRound:0, currentQuestion:0, lives:3, score:0,
+    streak:0, bestStreak:0, totalCorrect:0, answered:false,
+    timer:null, timerValue:100, roundsCompleted:0, shuffledQuestions:[],
+  };
+  sShowRoundTransition();
+}
+
+function sShowRoundTransition() {
+  const round = SOLO_ROUNDS[solo.currentRound];
+  setRoundColor(round.id);
+  document.getElementById('s-roundBig').textContent = `Round 0${round.id} / 04`;
+  document.getElementById('s-roundTitleBig').textContent = round.name;
+  document.getElementById('s-roundRule').innerHTML = round.rule;
+  goTo('s-round-screen');
+}
+
+function sBeginRound() {
+  const round = SOLO_ROUNDS[solo.currentRound];
+  solo.shuffledQuestions = shuffle(round.questions);
+  solo.currentQuestion = 0;
+  solo.answered = false;
+  goTo('s-game-screen');
+  sRenderQuestion();
+}
+
+function sRenderQuestion() {
+  const round = SOLO_ROUNDS[solo.currentRound];
+  const q = solo.shuffledQuestions[solo.currentQuestion];
+
+  setRoundColor(round.id);
+  document.getElementById('s-roundIndicator').textContent = `Round ${round.id} / 4`;
+  document.getElementById('s-roundLabel').textContent = round.label;
+  document.getElementById('s-scoreDisplay').textContent = solo.score;
+  document.getElementById('s-streakNum').textContent = solo.streak;
+
+  for (let i = 0; i < 3; i++) {
+    const el = document.getElementById('s-life' + i);
+    el.style.background = i >= solo.lives ? 'transparent' : 'var(--red)';
+    el.style.border = i >= solo.lives ? '1px solid var(--muted)' : 'none';
+  }
+
+  const pct = (solo.currentQuestion / round.questions.length) * 100;
+  document.getElementById('s-progressFill').style.width = pct + '%';
+
+  document.getElementById('s-questionContext').textContent = q.context;
+  document.getElementById('s-questionText').innerHTML = q.text.replace(
+    q.blank,
+    `<span id="s-blankSpan" style="display:inline-block;min-width:120px;border-bottom:3px solid var(--rc);color:var(--rc);text-align:center;padding:0 8px;vertical-align:bottom;transition:all 0.2s">${q.blank}</span>`
+  );
+  document.getElementById('s-feedbackRow').textContent = '';
+  document.getElementById('s-feedbackRow').style.color = '';
+  document.getElementById('s-questionCard').style.borderTop = '3px solid var(--rc)';
+
+  const opts = shuffle(q.options);
+  const grid = document.getElementById('s-optionsGrid');
+  grid.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.style.cssText = `background:var(--rc-dim);border:2px solid var(--rc-border);color:var(--text);font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(15px,3vw,19px);padding:20px 16px;cursor:pointer;transition:all 0.15s;text-align:center;border-radius:4px`;
+    btn.textContent = opt;
+    btn.onmouseover = () => { if (!btn.disabled) { btn.style.borderColor='var(--rc)'; btn.style.color='var(--rc)'; btn.style.transform='translateY(-2px)'; }};
+    btn.onmouseout  = () => { if (!btn.disabled) { btn.style.borderColor='var(--rc-border)'; btn.style.color='var(--text)'; btn.style.transform=''; }};
+    btn.onclick = () => sHandleAnswer(opt, q);
+    grid.appendChild(btn);
+  });
+
+  solo.answered = false;
+
+  clearInterval(solo.timer);
+  solo.timerValue = 100;
+  const bar = document.getElementById('s-timerBar');
+  bar.style.width = '100%';
+  bar.style.background = 'var(--rc)';
+
+  solo.timer = setInterval(() => {
+    solo.timerValue -= 1;
+    bar.style.width = solo.timerValue + '%';
+    if (solo.timerValue <= 25) bar.style.background = 'var(--red)';
+    if (solo.timerValue <= 0) { clearInterval(solo.timer); sHandleTimeout(q); }
+  }, 100);
+}
+
+function sHandleTimeout(q) {
+  if (solo.answered) return;
+  solo.answered = true;
+  sRevealCorrect(q);
+  flashScreen('red');
+  sLoseLife();
+  setTimeout(() => sNextQuestion(), 1800);
+}
+
+function sHandleAnswer(chosen, q) {
+  if (solo.answered) return;
+  solo.answered = true;
+  clearInterval(solo.timer);
+
+  const isCorrect = chosen === q.answer;
+  const blank = document.getElementById('s-blankSpan');
+  if (blank) {
+    blank.textContent = chosen;
+    blank.style.color = isCorrect ? 'var(--green)' : 'var(--red)';
+    blank.style.borderBottomColor = isCorrect ? 'var(--green)' : 'var(--red)';
+  }
+
+  document.querySelectorAll('#s-optionsGrid button').forEach(btn => {
+    btn.disabled = true; btn.style.cursor = 'not-allowed';
+    if (btn.textContent === q.answer) {
+      btn.style.background='var(--green-dim)'; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)';
+    } else if (btn.textContent === chosen && !isCorrect) {
+      btn.style.background='var(--red-dim)'; btn.style.borderColor='var(--red)'; btn.style.color='var(--red)';
+    }
+  });
+
+  const fb = document.getElementById('s-feedbackRow');
+  if (isCorrect) {
+    solo.streak++; solo.totalCorrect++;
+    if (solo.streak > solo.bestStreak) solo.bestStreak = solo.streak;
+    const pts = 10 + (solo.streak > 1 ? (solo.streak-1)*2 : 0);
+    solo.score += pts;
+    document.getElementById('s-scoreDisplay').textContent = solo.score;
+    document.getElementById('s-streakNum').textContent = solo.streak;
+    fb.textContent = solo.streak > 2 ? `✓ Correct! +${pts} (streak ×${solo.streak})` : `✓ Correct! +${pts}`;
+    fb.style.color = 'var(--green)';
+    flashScreen('green');
+    setTimeout(() => sNextQuestion(), 900);
+  } else {
+    solo.streak = 0;
+    document.getElementById('s-streakNum').textContent = 0;
+    fb.textContent = `✗ The answer is: ${q.answer}`;
+    fb.style.color = 'var(--red)';
+    flashScreen('red');
+    sLoseLife();
+    setTimeout(() => sNextQuestion(), 1800);
+  }
+}
+
+function sRevealCorrect(q) {
+  const blank = document.getElementById('s-blankSpan');
+  if (blank) { blank.textContent=q.answer; blank.style.color='var(--green)'; blank.style.borderBottomColor='var(--green)'; }
+  document.querySelectorAll('#s-optionsGrid button').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === q.answer) { btn.style.background='var(--green-dim)'; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)'; }
+  });
+  const fb = document.getElementById('s-feedbackRow');
+  fb.textContent = `Time's up. The answer was: ${q.answer}`;
+  fb.style.color = 'var(--red)';
+}
+
+function sLoseLife() {
+  if (solo.lives > 0) {
+    solo.lives--;
+    const el = document.getElementById('s-life' + solo.lives);
+    if (el) { el.style.background='transparent'; el.style.border='1px solid var(--muted)'; }
+  }
+  if (solo.lives <= 0) {
+    clearInterval(solo.timer);
+    solo.roundsCompleted = solo.currentRound + 1;
+    setTimeout(() => sShowEndScreen(), 2000);
+  }
+}
+
+function sNextQuestion() {
+  if (solo.lives <= 0) return;
+  solo.currentQuestion++;
+  const round = SOLO_ROUNDS[solo.currentRound];
+  if (solo.currentQuestion >= round.questions.length) {
+    solo.roundsCompleted = solo.currentRound + 1;
+    solo.currentRound++;
+    solo.currentRound >= SOLO_ROUNDS.length ? sShowEndScreen() : sShowRoundTransition();
+  } else {
+    sRenderQuestion();
+  }
+}
+
+function sShowEndScreen() {
+  clearInterval(solo.timer);
+  const total = solo.roundsCompleted * 10;
+  const pct = total > 0 ? Math.round((solo.totalCorrect / total) * 100) : 0;
+  let grade, gradeColor, label, message;
+  if (pct >= 90)      { grade='S'; gradeColor='var(--green)';  label='Outstanding'; message="You've got the present progressive under control. Every form, every spelling group. Excellent work."; }
+  else if (pct >= 75) { grade='A'; gradeColor='var(--green)';  label='Strong';       message="Really solid. A few small gaps — play again and you'll iron them out."; }
+  else if (pct >= 60) { grade='B'; gradeColor='var(--accent)'; label='Good';         message="You've got the basics. Push for the trickier forms — spelling groups and the now/always contrast."; }
+  else if (pct >= 45) { grade='C'; gradeColor='var(--blue)';   label='Keep going';   message="Some things are clicking. Play again — focus on the rounds where you lost lives."; }
+  else                { grade='D'; gradeColor='var(--red)';    label='Try again';    message="The present progressive takes practice. Start with Round 1 and build from there. You've got this."; }
+
+  document.getElementById('s-endGrade').textContent = grade;
+  document.getElementById('s-endGrade').style.color = gradeColor;
+  document.getElementById('s-endLabel').textContent = `${label} · ${pct}%`;
+  document.getElementById('s-finalScore').textContent = solo.score;
+  document.getElementById('s-finalCorrect').textContent = solo.totalCorrect;
+  document.getElementById('s-finalStreak').textContent = solo.bestStreak;
+  document.getElementById('s-finalRounds').textContent = solo.roundsCompleted;
+  document.getElementById('s-endMessage').textContent = message;
+  goTo('s-end-screen');
 }
 </script>
 </body>
